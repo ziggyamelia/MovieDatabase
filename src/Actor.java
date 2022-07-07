@@ -10,7 +10,7 @@ public class Actor {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -18,7 +18,7 @@ public class Actor {
     }
 
     public ArrayList<Movie> getMovies() {
-        return movies;
+        return this.movies;
     }
 
     public void setMovies(ArrayList<Movie> movies) {
