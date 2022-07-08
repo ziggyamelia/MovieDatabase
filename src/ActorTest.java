@@ -7,13 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ActorTest {
     private Actor actor;
     private final static String ACTOR_NAME = "Alice";
-    private final static Movie movie1 = new Movie("Alien", new ArrayList<Actor>(), 9); // keeping actors as empty for tests
-    private final static Movie movie2 = new Movie("Casino", new ArrayList<Actor>(), 8); // keeping actors as empty for tests
-    private ArrayList<Movie> movies;
+    private final static Movie movie1 = new Movie("Alien", new ArrayList<>(), 9); // keeping actors as empty for tests
+    private final static Movie movie2 = new Movie("Casino", new ArrayList<>(), 8); // keeping actors as empty for tests
 
     @BeforeEach
     void setUp() {
-        movies = new ArrayList<Movie>(); // empty movie list
+        ArrayList<Movie> movies = new ArrayList<>(); // empty movie list
         movies.add(movie1); // start by adding movie1 to the actor's CV
         actor = new Actor(ACTOR_NAME, movies);
     }
@@ -42,7 +41,7 @@ class ActorTest {
     @Test
     void setMovies() {
         // Change movie and check
-        ArrayList<Movie> testMovies = new ArrayList<Movie>(); // empty movie list
+        ArrayList<Movie> testMovies = new ArrayList<>(); // empty movie list
         testMovies.add(movie2); // start by adding movie1 to the actor's CV
         actor.setMovies(testMovies);
         assertEquals(actor.getMovies().get(0).getName(), movie2.getName());

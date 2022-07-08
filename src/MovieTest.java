@@ -11,13 +11,12 @@ class MovieTest {
     private static final double MOVIE_RATING = 9;
     private Actor actor1;
     private Actor actor2;
-    private ArrayList<Actor> actorList;
 
     @BeforeEach
     void setUp() {
-        actor1 = new Actor("Alice", new ArrayList<Movie>());
-        actor2 = new Actor("Bob", new ArrayList<Movie>());
-        actorList = new ArrayList<Actor>();
+        actor1 = new Actor("Alice", new ArrayList<>());
+        actor2 = new Actor("Bob", new ArrayList<>());
+        ArrayList<Actor> actorList = new ArrayList<>();
         actorList.add(actor1);
         testMovie = new Movie(MOVIE_NAME, actorList, MOVIE_RATING);
     }
@@ -42,7 +41,7 @@ class MovieTest {
 
     @Test
     void setActors() {
-        ArrayList<Actor> setActorList = new ArrayList<Actor>();
+        ArrayList<Actor> setActorList = new ArrayList<>();
         setActorList.add(actor2);
         testMovie.setActors(setActorList);
         Actor testActor = testMovie.getActors().get(0);
