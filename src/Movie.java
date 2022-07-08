@@ -5,10 +5,9 @@ public class Movie {
     private ArrayList<Actor> actors;
     private double rating;
 
-    public Movie(String name, ArrayList<Actor> actors, double rating) {
+    public Movie(String name, ArrayList<Actor> actors) {
         this.name = name;
         this.actors = actors;
-        this.rating = rating;
     }
 
     public String getName() {

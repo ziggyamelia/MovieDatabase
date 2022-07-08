@@ -20,16 +20,18 @@ public class MovieDatabase {
 
         // Add all movies and actors to database
         movieDatabase.etlMovieFile(); // adds all movies and
-        for (Movie movie : movieDatabase.getMovieList()) {
-            System.out.println(movie.getName() + movie.getRating());
-        }
-        for (Actor actor : movieDatabase.getActorList()) {
-            System.out.println(actor.getName());
-        }
+//        for (Movie movie : movieDatabase.getMovieList()) {
+//            System.out.println(movie.getName() + movie.getRating());
+//        }
+//        for (Actor actor : movieDatabase.getActorList()) {
+//            System.out.println(actor.getName());
+//        }
 
         // add all ratings for ratings.txt
-//        System.out.println(movieDatabase.getBestActor());
-//        System.out.println(movieDatabase.getBestMovie());
+        movieDatabase.etlRatingsFile();
+
+        System.out.println(movieDatabase.getBestActor());
+        System.out.println(movieDatabase.getBestMovie());
     }
 
     public ArrayList<Movie> getMovieList() {
@@ -62,7 +64,7 @@ public class MovieDatabase {
      */
     public void addMovie(String name, String[] actors) {
         ArrayList<Actor> movieActorList = generateActorListFromStringArray(actors, name); // recursive dependency is broken here
-        Movie newMovieRecord = new Movie(name, movieActorList, -1); // setting default rating of -1
+        Movie newMovieRecord = new Movie(name, movieActorList); // setting default rating of null
 
         // Add movie record if it doesn't exist
         if (!movieRecordExists(name)) {
@@ -144,6 +146,73 @@ public class MovieDatabase {
     }
 
     /**
+     * Get a movie record by name
+     *
+     * @param name
+     * @return Movie object
+     */
+    public Movie getMovieRecord(String name) {
+        String movieRecordName;
+
+        for (Movie movie : this.movieList) {
+            movieRecordName = movie.getName();
+            if (movieRecordName != null && movieRecordName.equals(name)) {
+                return movie;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update a movie record by removing and replacing with the passed in record.
+     *
+     * This is not efficient. Checking if record exists before running scans the entire DB, then does it again to
+     * replace the record.
+     *
+     * @param movieRecord
+     * @throws RuntimeException
+     */
+    public void updateMovieRecord(Movie movieRecord) throws RuntimeException {
+        Movie movie;
+        if (!movieRecordExists(movieRecord.getName())) {
+            throw new RuntimeException("Attempted to update movie record by name, but it does not exist in database.");
+        }
+
+        for (int movieIdx = 0; movieIdx < this.movieList.size(); movieIdx++) {
+            movie = this.movieList.get(movieIdx);
+            if (movieRecord.getName() != null && movieRecord.getName().equals(movie.getName())) {
+                this.movieList.remove(movie);
+                this.movieList.add(movieRecord);
+                break; // once record is updated, no need to continue to scan DB, assumes
+            }
+        }
+    }
+
+    /**
+     * Updates all the movie records in the Actor objects stored in the actor database
+     *
+     * Purpose of this is to ensure ratings are up-to-date.
+     *
+     */
+    public void refreshActorMovieRecords() {
+        Actor actor;
+        Movie movieFromActorDB;
+        Movie movieFromMovieDB;
+        for (int actorIdx = 0; actorIdx < this.actorList.size(); actorIdx++) {
+            actor = this.actorList.get(actorIdx);
+            ArrayList<Movie> updatedMovies = new ArrayList<>();
+            for (int movieIdx = 0; movieIdx < actor.getMovies().size(); movieIdx++) {
+                // Gets the movie record from the Movie DB to update the movie records in the Actor DB.
+                movieFromActorDB = actor.getMovies().get(movieIdx);
+                movieFromMovieDB = getMovieRecord(movieFromActorDB.getName());
+                updatedMovies.add(movieFromMovieDB);
+            }
+            actor.setMovies(updatedMovies); // refreshes the movies for that actor record
+            this.actorList.set(actorIdx, actor);
+        }
+    }
+
+    /**
      * Generates an ArrayList of Actor objects
      *
      * This method deliberately breaks the recursion from the Movie-Actor relationship.
@@ -160,7 +229,7 @@ public class MovieDatabase {
         ArrayList<Actor> outputActorList = new ArrayList<>();
         ArrayList<Actor> emptyActorList = new ArrayList<>();
         ArrayList<Movie> movieList = new ArrayList<>();
-        movieList.add(new Movie(movieName, emptyActorList, -1));
+        movieList.add(new Movie(movieName, emptyActorList));
         Actor actor;
 
         for (int actorIdx = 0; actorIdx < actors.length; actorIdx++) {
@@ -177,7 +246,8 @@ public class MovieDatabase {
      * @param rating rating of film out of 100
      */
     public void addRating(String name, double rating) {
-        // TODO
+        // Do not understand why it was required to have this method as well as updateRating. They do the same thing.
+        updateRating(name, rating);
     }
 
     /**
@@ -187,7 +257,12 @@ public class MovieDatabase {
      * @param newRating rating of film out of 100
      */
     public void updateRating(String name, double newRating) {
-        // TODO
+        Movie movieRecord;
+        movieRecord = getMovieRecord(name);
+        if (movieRecord != null) {
+            movieRecord.setRating(newRating);
+            updateMovieRecord(movieRecord);
+        }
     }
 
     /**
@@ -195,8 +270,18 @@ public class MovieDatabase {
      * @return actors name as a string
      */
     public String getBestActor() {
-        // TODO
-        return "Actor Name";
+        // Start with first movie then scan list and update until list is done
+        Actor topRatedActor = this.actorList.get(0);
+
+        for (Actor actor : this.actorList) {
+            if (actor.getAverageMovieRating() > topRatedActor.getAverageMovieRating()) {
+                topRatedActor = actor;
+                System.out.println("New top actor " + topRatedActor.getName() + topRatedActor.getAverageMovieRating());
+            }
+        }
+
+        System.out.println(topRatedActor.getName() + ": " + topRatedActor.getAverageMovieRating());
+        return topRatedActor.getName();
     }
 
     /**
@@ -204,8 +289,17 @@ public class MovieDatabase {
      * @return returns movie name as a string
      */
     public String getBestMovie() {
-        // TODO
-        return "Movie Name";
+        // Start with first movie then scan list and update until list is done
+        Movie topRatedMovie = this.movieList.get(0);
+
+        for (Movie movie : this.movieList) {
+            if (movie.getRating() > topRatedMovie.getRating()) {
+                System.out.println("New top movie " + topRatedMovie.getName() + topRatedMovie.getRating());
+                topRatedMovie = movie;
+            }
+        }
+        System.out.println(topRatedMovie.getName() + ": " + topRatedMovie.getRating());
+        return topRatedMovie.getName();
     }
 
     /**
@@ -295,7 +389,7 @@ public class MovieDatabase {
 
             // If movie has changed from last row, then load the previous movie to the DB and reset the actor
             // list.
-            if (!currMovie.equals(prevMovie)) {
+            if (!currMovie.equals(prevMovie) && prevMovie != null) {
                 addMovie(prevMovie, actorsInMovie.toArray(new String[0])); // load previous movie to db with all actors
                 actorsInMovie = new ArrayList<>();
             }
@@ -309,30 +403,61 @@ public class MovieDatabase {
             if (row == actorMovieLong.size() - 1) { // if end of dataset load movie to db
                 addMovie(prevMovie, actorsInMovie.toArray(new String[0]));
             }
-
         }
-
-//        for (int row = 0; row < actorMovieLong.size(); row++) {
-//            System.out.println(actorMovieLong.get(row).actor + " ++++ " + actorMovieLong.get(row).movie);
-//        }
-
     }
 
+    /**
+     * A single record for the long movie-actor dataset
+     */
+    class MovieLongRecord {
+        public String actor;
+        public String movie;
+
+        public MovieLongRecord(String actor, String movie) {
+            this.actor = actor;
+            this.movie = movie;
+        }
+    }
+
+    /**
+     * Ingests and loads the ratings file
+     */
     private void etlRatingsFile() {
-        // TODO
+        // Prepare file path to be read from
+        Path path = Paths.get(ratingsFilePath).normalize();
+        System.out.println("Reading file: " + path);
+
+        try {
+            String line; // line of file
+            String[] ratingRecord;
+            String movieName;
+            double movieRating;
+            Movie movieRecord;
+
+            // Prepare buffered reader instance
+            Reader reader = new FileReader(path.toString());
+            BufferedReader br = new BufferedReader(reader);
+
+            // Read in file (Skip first line since it is a header)
+            br.readLine();
+            while((line = br.readLine()) != null) {
+                // parse the information to movie name and rating value
+                ratingRecord = line.split("\t");
+                movieName = ratingRecord[0];
+                movieRating = Double.parseDouble(ratingRecord[1]);
+
+                // updates movie record in DB
+                addRating(movieName, movieRating);
+            }
+
+            // After all the ratings are updated in the movie DB need to refresh all the Actor objects that contain
+            // movies
+            refreshActorMovieRecords();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
 
-/**
- * A single record for the long movie-actor dataset
- */
-class MovieLongRecord {
-    public String actor;
-    public String movie;
-
-    public MovieLongRecord(String actor, String movie) {
-        this.actor = actor;
-        this.movie = movie;
-    }
-}

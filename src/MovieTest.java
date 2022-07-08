@@ -18,7 +18,8 @@ class MovieTest {
         actor2 = new Actor("Bob", new ArrayList<>());
         ArrayList<Actor> actorList = new ArrayList<>();
         actorList.add(actor1);
-        testMovie = new Movie(MOVIE_NAME, actorList, MOVIE_RATING);
+        testMovie = new Movie(MOVIE_NAME, actorList);
+        testMovie.setRating(MOVIE_RATING);
     }
 
     @Test

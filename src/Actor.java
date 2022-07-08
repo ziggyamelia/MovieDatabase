@@ -24,4 +24,12 @@ public class Actor {
     public void setMovies(ArrayList<Movie> movies) {
         this.movies = movies;
     }
+
+    public double getAverageMovieRating() {
+        double ratingSum = 0;
+        for (Movie movie : movies) {
+            ratingSum += movie.getRating();
+        }
+        return ratingSum/movies.size();
+    }
 }
