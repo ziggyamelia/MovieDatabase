@@ -94,11 +94,16 @@ public class MovieDatabase {
 
             if (actorRecord != null) {
                 actorRecord.getMovies().add(newMovieRecord); // Add movie to actors record
-                newActorRecord = new Actor(actorRecord.getName(), actorRecord.getMovies());
+                newActorRecord = new Actor();
+                newActorRecord.setName(actorRecord.getName());
+                newActorRecord.setMovies(actorRecord.getMovies());
+                this.actorList.remove(actorRecord);
             } else {
                 newMovieRecords = new ArrayList<>();
                 newMovieRecords.add(newMovieRecord);
-                newActorRecord = new Actor(actorName, newMovieRecords); // Add movie
+                newActorRecord = new Actor(); // Add movie
+                newActorRecord.setName(actorName);
+                newActorRecord.setMovies(newMovieRecords);
             }
 
             this.actorList.add(newActorRecord);
@@ -135,6 +140,10 @@ public class MovieDatabase {
      */
     public boolean movieRecordExists(String name) {
         String movieRecordName;
+
+        if (this.movieList.size() == 0) {
+            return false;
+        }
 
         for (Movie movie : this.movieList) {
             movieRecordName = movie.getName();
@@ -233,7 +242,9 @@ public class MovieDatabase {
         Actor actor;
 
         for (int actorIdx = 0; actorIdx < actors.length; actorIdx++) {
-            actor = new Actor(actors[actorIdx], movieList);
+            actor = new Actor();
+            actor.setName(actors[actorIdx]);
+            actor.setMovies(movieList);
             outputActorList.add(actor);
         }
         return outputActorList;

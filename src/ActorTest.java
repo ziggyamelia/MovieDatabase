@@ -16,7 +16,9 @@ class ActorTest {
         movie2.setRating(8);
         ArrayList<Movie> movies = new ArrayList<>(); // empty movie list
         movies.add(movie1); // start by adding movie1 to the actor's CV
-        actor = new Actor(ACTOR_NAME, movies);
+        actor = new Actor();
+        actor.setName(ACTOR_NAME);
+        actor.setMovies(movies);
     }
 
     @Test

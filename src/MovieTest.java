@@ -14,8 +14,12 @@ class MovieTest {
 
     @BeforeEach
     void setUp() {
-        actor1 = new Actor("Alice", new ArrayList<>());
-        actor2 = new Actor("Bob", new ArrayList<>());
+        actor1 = new Actor();
+        actor1.setName("Alice");
+        actor1.setMovies(new ArrayList<>());
+        actor2 = new Actor();
+        actor2.setName("Bob");
+        actor2.setMovies(new ArrayList<>());
         ArrayList<Actor> actorList = new ArrayList<>();
         actorList.add(actor1);
         testMovie = new Movie(MOVIE_NAME, actorList);

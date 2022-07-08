@@ -4,9 +4,7 @@ public class Actor {
     private String name;
     private ArrayList<Movie> movies;
 
-    public Actor(String name, ArrayList<Movie> movies) {
-        this.name = name;
-        this.movies = movies;
+    public Actor() {
     }
 
     public String getName() {
